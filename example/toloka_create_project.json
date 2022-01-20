@@ -1,0 +1,32 @@
+{
+    "pipeline": {
+        "name": "toloka_create_project"
+    },
+    "description": "A pipeline that creates project on Toloka.",
+    "transform": {
+        "image": "toloka_pachyderm:latest",
+        "cmd": [
+            "python3",
+            "/code/create_project.py",
+            "--token_env", "TOLOKA_API_ACCESS_KEY",
+            "--project_config_path", "/pfs/toloka_project_config/project.json",
+            "--project_id_path", "/pfs/out/project.txt"
+        ],
+        "secrets": [
+            {
+                "name": "toloka-api",
+                "env_var": "TOLOKA_API_ACCESS_KEY",
+                "key": "token"
+            }
+        ]
+    },
+    "parallelism_spec": {
+        "constant": "1"
+    },
+    "input": {
+        "pfs": {
+            "repo": "toloka_project_config",
+            "glob": "/"
+        }
+    }
+}

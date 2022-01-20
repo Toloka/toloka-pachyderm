@@ -1,0 +1,32 @@
+{
+    "pipeline": {
+        "name": "toloka_aggregate_assignments"
+    },
+    "description": "A pipeline for assignments aggregation from Toloka pool.",
+    "transform": {
+        "image": "toloka_pachyderm:latest",
+        "cmd": [
+            "python3",
+            "/code/aggregate_assignments.py",
+            "--token_env", "TOLOKA_API_ACCESS_KEY",
+            "--pool_id_path", "/pfs/toloka_wait_pool/pool.txt",
+            "--aggregated_tasks_path", "/pfs/out/results.csv"
+        ],
+        "secrets": [
+            {
+                "name": "toloka-api",
+                "env_var": "TOLOKA_API_ACCESS_KEY",
+                "key": "token"
+            }
+        ]
+    },
+    "parallelism_spec": {
+        "constant": "1"
+    },
+    "input": {
+        "pfs": {
+            "repo": "toloka_wait_pool",
+            "glob": "/"
+        }
+    }
+}

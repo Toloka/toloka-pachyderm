@@ -1,0 +1,43 @@
+{
+    "pipeline": {
+        "name": "concatenate_datasets"
+    },
+    "description": "A pipeline that concatenates two datasets into one.",
+    "transform": {
+        "image": "toloka_pachyderm:latest",
+        "cmd": [
+            "python3",
+            "/code/concatenate_datasets.py",
+            "--datasets", "/pfs/clickbait_data/train.csv", "/pfs/toloka_aggregate_assignments/results.csv",
+            "--output", "/pfs/out/enriched_train.csv"
+        ],
+        "secrets": [
+            {
+                "name": "toloka-api",
+                "env_var": "TOLOKA_API_ACCESS_KEY",
+                "key": "token"
+            }
+        ]
+    },
+    "parallelism_spec": {
+        "constant": "1"
+    },
+    "input": {
+        "join": [
+            {
+                "pfs": {
+                    "repo": "clickbait_data",
+                    "glob": "/",
+                    "join_on": "$1"
+                }
+            },
+            {
+                "pfs": {
+                    "repo": "toloka_aggregate_assignments",
+                    "glob": "/",
+                    "join_on": "$1"
+                }
+            }
+        ]
+    }
+}

@@ -1,0 +1,45 @@
+{
+    "pipeline": {
+        "name": "train_test_model"
+    },
+    "description": "A pipeline that trains Random Forest classifier and evaluate Accuracy and F1 score on test data.",
+    "transform": {
+        "image": "toloka_pachyderm:latest",
+        "cmd": [
+            "python3",
+            "/code/train_test_model.py",
+            "--train_data", "/pfs/clickbait_data/train.csv", "/pfs/toloka_aggregate_assignments/results.csv",
+            "--test_data", "/pfs/clickbait_data/test.csv",
+            "--results_path", "/pfs/out/random_forest_test.json",
+            "--model_path", "/pfs/out/rf_model.pkl"
+        ],
+        "secrets": [
+            {
+                "name": "toloka-api",
+                "env_var": "TOLOKA_API_ACCESS_KEY",
+                "key": "token"
+            }
+        ]
+    },
+    "parallelism_spec": {
+        "constant": "1"
+    },
+    "input": {
+        "join": [
+            {
+                "pfs": {
+                    "repo": "clickbait_data",
+                    "glob": "/",
+                    "join_on": "$1"
+                }
+            },
+            {
+                "pfs": {
+                    "repo": "toloka_aggregate_assignments",
+                    "glob": "/",
+                    "join_on": "$1"
+                }
+            }
+        ]
+    }
+}

@@ -1,0 +1,53 @@
+{
+    "pipeline": {
+        "name": "toloka_create_pool"
+    },
+    "description": "A pipeline that creates pool for project on Toloka.",
+    "transform": {
+        "image": "toloka_pachyderm:latest",
+        "cmd": [
+            "python3",
+            "/code/create_pool.py",
+            "--token_env", "TOLOKA_API_ACCESS_KEY",
+            "--project_id_path", "/pfs/toloka_create_project/project.txt",
+            "--training_id_path", "/pfs/toloka_create_training/training.txt",
+            "--pool_config_path", "/pfs/toloka_pool/pool.json",
+            "--pool_id_path", "/pfs/out/pool.txt"
+        ],
+        "secrets": [
+            {
+                "name": "toloka-api",
+                "env_var": "TOLOKA_API_ACCESS_KEY",
+                "key": "token"
+            }
+        ]
+    },
+    "parallelism_spec": {
+        "constant": "1"
+    },
+    "input": {
+        "join": [
+            {
+                "pfs": {
+                    "repo": "toloka_pool",
+                    "glob": "/",
+                    "join_on": "$1"
+                }
+            },
+            {
+                "pfs": {
+                    "repo": "toloka_create_project",
+                    "glob": "/",
+                    "join_on": "$1"
+                }
+            },
+            {
+                "pfs": {
+                    "repo": "toloka_create_training",
+                    "glob": "/",
+                    "join_on": "$1"
+                }
+            }
+        ]
+    }
+}

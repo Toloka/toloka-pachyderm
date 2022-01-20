@@ -1,0 +1,46 @@
+{
+    "pipeline": {
+        "name": "toloka_create_training"
+    },
+    "description": "A pipeline that creates training for project on Toloka.",
+    "transform": {
+        "image": "toloka_pachyderm:latest",
+        "cmd": [
+            "python3",
+            "/code/create_training.py",
+            "--token_env",
+            "TOLOKA_API_ACCESS_KEY",
+            "--project_id_path", "/pfs/toloka_create_project/project.txt",
+            "--training_config_path", "/pfs/toloka_training_config/training.json",
+            "--training_id_path", "/pfs/out/training.txt"
+        ],
+        "secrets": [
+            {
+                "name": "toloka-api",
+                "env_var": "TOLOKA_API_ACCESS_KEY",
+                "key": "token"
+            }
+        ]
+    },
+    "parallelism_spec": {
+        "constant": "1"
+    },
+    "input": {
+        "join": [
+            {
+                "pfs": {
+                    "repo": "toloka_training_config",
+                    "glob": "/",
+                    "join_on": "$1"
+                }
+            },
+            {
+                "pfs": {
+                    "repo": "toloka_create_project",
+                    "glob": "/",
+                    "join_on": "$1"
+                }
+            }
+        ]
+    }
+}

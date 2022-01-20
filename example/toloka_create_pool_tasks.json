@@ -1,0 +1,45 @@
+{
+    "pipeline": {
+        "name": "toloka_create_pool_tasks"
+    },
+    "description": "A pipeline that creates tasks for pool on Toloka.",
+    "transform": {
+        "image": "toloka_pachyderm:latest",
+        "cmd": [
+            "python3",
+            "/code/create_tasks_from_csv.py",
+            "--token_env", "TOLOKA_API_ACCESS_KEY",
+            "--pool_id_path", "/pfs/toloka_create_pool/pool.txt",
+            "--output_pool_id_path", "/pfs/out/pool.txt",
+            "--tasks_csv", "/pfs/toloka_pool/pool_tasks.csv"
+        ],
+        "secrets": [
+            {
+                "name": "toloka-api",
+                "env_var": "TOLOKA_API_ACCESS_KEY",
+                "key": "token"
+            }
+        ]
+    },
+    "parallelism_spec": {
+        "constant": "1"
+    },
+    "input": {
+        "join": [
+            {
+                "pfs": {
+                    "repo": "toloka_pool",
+                    "glob": "/",
+                    "join_on": "$1"
+                }
+            },
+            {
+                "pfs": {
+                    "repo": "toloka_create_pool",
+                    "glob": "/",
+                    "join_on": "$1"
+                }
+            }
+        ]
+    }
+}
